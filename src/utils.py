@@ -29,6 +29,8 @@ def get_expanded_slice_idx(coord_z, diameter_z):
 
 
 def pad_image(raw_ct_img, slice_idx, padding):
-    padding = np.zeros((padding, *raw_ct_img.shape[1:]), dtype=raw_ct_img.dtype)
-    padded_raw_ct_img = np.concatenate((padding, raw_ct_img, padding), axis=0)
+    padding_slices = np.zeros((padding, *raw_ct_img.shape[1:]), dtype=raw_ct_img.dtype)
+    padded_raw_ct_img = np.concatenate((padding_slices, raw_ct_img, padding_slices), axis=0)
+    if slice_idx >= len(raw_ct_img):
+        raise IndexError(f"Index {slice_idx} larger than the max index ({len(raw_ct_img)}) of raw_ct_img")
     return padded_raw_ct_img[slice_idx : slice_idx + padding * 2 + 1]

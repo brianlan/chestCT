@@ -34,7 +34,7 @@ def process_patient(patient_id):
 
 def main():
     indices = get_indices(args.indices, args.dataset_dir, ".mhd")
-    for ind in indices:
+    for ind in tqdm(indices):
         process_patient(ind)
     # with multiprocessing.Pool(processes=args.num_processes) as pool:
     #     _ = list(tqdm(pool.imap_unordered(process_patient, indices), total=len(indices)))
