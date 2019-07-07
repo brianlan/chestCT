@@ -4,11 +4,19 @@ import numpy as np
 
 
 class Meta:
-    def __init__(self, path):
-        self.meta_dict = self.read_meta(path)
-        self.dim_size = self._convert(self.meta_dict['DimSize'], dtype=int)
-        self.offset = self._convert(self.meta_dict['Offset'], dtype=float)
-        self.element_spacing = self._convert(self.meta_dict['ElementSpacing'], dtype=float)
+    def __init__(self, meta_dict):
+        self.meta_dict = meta_dict
+        self.derive_other_fields()
+
+    def derive_other_fields(self):
+        setattr(self, "dim_size", self._convert(self.meta_dict['DimSize'], dtype=int))
+        setattr(self, "offset", self._convert(self.meta_dict['Offset'], dtype=float))
+        setattr(self, "element_spacing", self._convert(self.meta_dict['ElementSpacing'], dtype=float))
+
+    @classmethod
+    def from_path(cls, path):
+        meta_dict = Meta.read_meta(path)
+        return Meta(meta_dict)
 
     @staticmethod
     def _convert(str_list, dtype=float):
@@ -54,6 +62,6 @@ class Label:
 def read_im(_id, data_dir):
     with open(data_dir / f"{_id}.raw", 'rb') as f:
         data = f.read()
-    meta = Meta(data_dir / f"{_id}.mhd")
+    meta = Meta.from_path(data_dir / f"{_id}.mhd")
     im = np.frombuffer(data, dtype=np.short).reshape(meta.dim_size[2], *meta.dim_size[:2])
     return im, meta

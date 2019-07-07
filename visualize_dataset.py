@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 from src.dataset import read_im, Label
-from src.utils import get_indices, assert_int, derive_bbox, get_expanded_slice_idx
+from src.utils import get_indices, assert_int, x_y_w_h_2_xmn_ymn_xmx_ymx, get_expanded_slice_idx
 
 
 parser = argparse.ArgumentParser()
@@ -48,7 +48,7 @@ def draw_lesions(im, lesions, save_dir):
     for _, les in lesions.iterrows():
         slice_idx = get_expanded_slice_idx(les.coordZ, les.diameterZ)
         for idx in slice_idx:
-            _bbox = derive_bbox(les.coordX, les.coordY, les.diameterX, les.diameterY)
+            _bbox = x_y_w_h_2_xmn_ymn_xmx_ymx(les.coordX, les.coordY, les.diameterX, les.diameterY)
             boxes_to_draw[idx].append((_bbox, les.label))
 
     if args.output_normal_slices:

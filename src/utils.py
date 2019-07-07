@@ -12,19 +12,29 @@ def get_indices(ind_path, root_dir, suffix):
     return indices
 
 
-def derive_bbox(coord_x, coord_y, diameter_x, diameter_y):
-    return np.array([coord_x - diameter_x, coord_y - diameter_y, coord_x + diameter_x, coord_y + diameter_y],
-                    dtype=np.int32)
+def x_y_w_h_2_xmn_ymn_xmx_ymx(coord_x, coord_y, diameter_x, diameter_y):
+    half_diameter_x, half_diameter_y = diameter_x / 2, diameter_y / 2
+    return np.array(
+        [coord_x - half_diameter_x, coord_y - half_diameter_y, coord_x + half_diameter_x, coord_y + half_diameter_y],
+        dtype=np.int32,
+    )
+
+
+def xmn_ymn_xmx_ymx_2_x_y_w_h(bbox):
+    """bbox's 4 values are: xmin, ymin, xmax, ymax"""
+    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    center_x, center_y = (bbox[2] + bbox[0]) / 2, (bbox[3] + bbox[1]) / 2,
+    return [center_x, center_y, w, h]
 
 
 def assert_int(number, name):
-    assert abs(number - round(number)) < 1e-6, f'{name} is expected to be a integer.'
+    assert abs(number - round(number)) < 1e-6, f"{name} is expected to be a integer."
 
 
 def get_expanded_slice_idx(coord_z, diameter_z):
-    assert_int(diameter_z, 'diameter_z')
+    assert_int(diameter_z, "diameter_z")
     start = coord_z - (diameter_z - 1) / 2
-    assert_int(start, 'start')
+    assert_int(start, "start")
     return list(range(int(round(start)), int(round(start + diameter_z))))
 
 
@@ -34,3 +44,7 @@ def pad_image(raw_ct_img, slice_idx, padding):
     if slice_idx >= len(raw_ct_img):
         raise IndexError(f"Index {slice_idx} larger than the max index ({len(raw_ct_img)}) of raw_ct_img")
     return padded_raw_ct_img[slice_idx : slice_idx + padding * 2 + 1]
+
+
+def merge_slices_of_patient(_id, lesions_on_slices, meta):
+    a = 199
