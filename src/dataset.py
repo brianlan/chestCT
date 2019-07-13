@@ -45,14 +45,14 @@ class Label:
     def get(self, _id, meta=None):
         if meta is None:
             return self[_id]
-        restored_label = self[_id]
-        restored_label.loc[:, 'coordX'] = (restored_label.loc[:, 'coordX'] - meta.offset[0]) / meta.element_spacing[0]
-        restored_label.loc[:, 'coordY'] = (restored_label.loc[:, 'coordY'] - meta.offset[1]) / meta.element_spacing[1]
-        restored_label.loc[:, 'coordZ'] = (restored_label.loc[:, 'coordZ'] - meta.offset[2]) / meta.element_spacing[2]
-        restored_label.loc[:, 'diameterX'] = restored_label.loc[:, 'diameterX'] / meta.element_spacing[0]
-        restored_label.loc[:, 'diameterY'] = restored_label.loc[:, 'diameterY'] / meta.element_spacing[1]
-        restored_label.loc[:, 'diameterZ'] = restored_label.loc[:, 'diameterZ'] / meta.element_spacing[2]
-        return restored_label
+        pix_repr_label = self[_id]
+        pix_repr_label.loc[:, 'coordX'] = (pix_repr_label.loc[:, 'coordX'] - meta.offset[0]) / meta.element_spacing[0]
+        pix_repr_label.loc[:, 'coordY'] = (pix_repr_label.loc[:, 'coordY'] - meta.offset[1]) / meta.element_spacing[1]
+        pix_repr_label.loc[:, 'coordZ'] = (pix_repr_label.loc[:, 'coordZ'] - meta.offset[2]) / meta.element_spacing[2]
+        pix_repr_label.loc[:, 'diameterX'] = pix_repr_label.loc[:, 'diameterX'] / meta.element_spacing[0]
+        pix_repr_label.loc[:, 'diameterY'] = pix_repr_label.loc[:, 'diameterY'] / meta.element_spacing[1]
+        pix_repr_label.loc[:, 'diameterZ'] = pix_repr_label.loc[:, 'diameterZ'] / meta.element_spacing[2]
+        return pix_repr_label
 
     @property
     def all_patient_ids(self):
