@@ -250,5 +250,5 @@ def calc_overlaps(dets_a, dets_b):
     overlaps = np.zeros((len(dets_a), len(dets_b)))
     for i, a in enumerate(dets_a):
         for j, b in enumerate(dets_b):
-            overlaps[i, j] = (a[0] == b[0]) * iou(BBox(*a[1:5]), BBox(*b[1:5]))
+            overlaps[i, j] = (a[1] == b[1]) * iou(BBox(*a[2:6]), BBox(*b[2:6]))
     return overlaps

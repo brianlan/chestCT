@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--objinfo-path", type=Path, required=True)
 parser.add_argument("--meta-dir", type=Path, required=True)
 parser.add_argument("--output-file-path", type=Path, required=True)
-parser.add_argument("--match-iou-thresh", type=float, default=0.3)
+parser.add_argument("--match-iou-thresh", type=float, default=0.6)
 args = parser.parse_args()
 
 
@@ -32,6 +32,11 @@ def read_predictions():
 
 
 def match_detections_into_groups(slice_partition):
+    # prepend slice_idx to each det
+    for s_id in slice_partition:
+        nrow = slice_partition[s_id].shape[0]
+        slice_partition[s_id] = np.concatenate((np.ones((nrow, 1)) * int(s_id), slice_partition[s_id]), axis=1)
+
     # initialize groups with the first slice detections
     slice_iter = iter(slice_partition.keys())
     first_slice_id = next(slice_iter)
@@ -39,16 +44,31 @@ def match_detections_into_groups(slice_partition):
 
     # go through the next slice to find close dets and put them into the same group
     for slice_id in slice_iter:
-        latest_idx, latest_added_dets = zip(*[(i, g[-1]) for i, g in enumerate(groups) if g[-1].sum() != 0.0])
-        overlaps = calc_overlaps(slice_partition[slice_id], latest_added_dets)
+        prev_idx, prev_dets = zip(*[(i, g[-1]) for i, g in enumerate(groups) if g[-1].sum() != 0.0])
+        overlaps = calc_overlaps(slice_partition[slice_id], prev_dets)
         assignment = linear_sum_assignment(1 - overlaps)
+
         for s_id, g_id in zip(assignment[0], assignment[1]):
-            r_g_id = latest_idx[g_id]  # real g_id
+            r_g_id = prev_idx[g_id]  # real g_id
+            cur_det = slice_partition[slice_id][None, s_id]
             if overlaps[s_id, g_id] > args.match_iou_thresh:
-                groups[r_g_id] = np.concatenate((groups[r_g_id], slice_partition[slice_id][None, s_id]), axis=0)
+                groups[r_g_id] = np.concatenate((groups[r_g_id], cur_det), axis=0)
             else:
-                groups[r_g_id] = np.concatenate((groups[r_g_id], np.zeros((1, 6))), axis=0)
-                groups.append(slice_partition[slice_id][None, s_id])
+                groups[r_g_id] = np.concatenate((groups[r_g_id], np.zeros((1, 7))), axis=0)
+                groups.append(cur_det)
+
+        # append unmatched cur dets to groups
+        for i in set(range(len(slice_partition[slice_id]))) - set(assignment[0]):
+            groups.append(slice_partition[slice_id][None, i])
+
+        # concat 0-placeholder to unmatched prev_dets
+        for i in set(range(len(prev_dets))) - set(assignment[1]):
+            r_g_id = prev_idx[i]  # real g_id
+            groups[r_g_id] = np.concatenate((groups[r_g_id], np.zeros((1, 7))), axis=0)
+
+    # remove 0-placeholder
+    for i, g in enumerate(groups):
+        groups[i] = g[g.sum(axis=1) != 0.0]
 
     return groups
 
