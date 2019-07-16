@@ -221,14 +221,15 @@ def pad_image(raw_ct_img, slice_idx, padding):
     return padded_raw_ct_img[slice_idx : slice_idx + padding * 2 + 1]
 
 
-def merge_slices_of_patient(slice_idx, lesion_bboxes, confidences, meta):
-    bbox_mean = lesion_bboxes.mean(axis=0)
-    conf_mean = np.mean(confidences)
-    coord_z, diameter_z = get_coord_z_and_diameter_z(slice_idx)
+def merge_slices_of_patient(lesion_on_slices, meta):
+    bbox_mean = lesion_on_slices[:, 2:6].mean(axis=0)
+    conf_mean = np.mean(lesion_on_slices[:, 6])
+    coord_z, diameter_z = get_coord_z_and_diameter_z(lesion_on_slices[:, 0])
     coord_x, coord_y, diameter_x, diameter_y = xmn_ymn_xmx_ymx_2_x_y_w_h(bbox_mean)
     coord_x, coord_y, coord_z, diameter_x, diameter_y, diameter_z = \
         cuboid_pix_2_real(coord_x, coord_y, coord_z, diameter_x, diameter_y, diameter_z, meta)
-    return coord_x, coord_y, coord_z, diameter_x, diameter_y, diameter_z, conf_mean
+    cls = lesion_on_slices[0, 1]
+    return cls, coord_x, coord_y, coord_z, diameter_x, diameter_y, diameter_z, conf_mean
 
 
 def cuboid_pix_2_real(coord_x, coord_y, coord_z, diameter_x, diameter_y, diameter_z, meta):

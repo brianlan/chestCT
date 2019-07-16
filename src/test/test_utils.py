@@ -60,15 +60,13 @@ def meta1():
 
 
 def test_merge_slices_of_patient2(meta1):
-    slice_idx = [33, 34, 35, 36]
-    classes = [2, 2, 2, 2]
-    confidences = [0.1799, 0.2455, 0.2774, 0.0504]
-    lesion_bboxes = np.array([[326.1, 215.5, 347.5, 235.1],
-                              [326.5, 215.4, 348.9, 235.8],
-                              [326.4, 215.6, 349.2, 236.8],
-                              [326.4, 215.4, 347.6, 235.4]])
-    merged = merge_slices_of_patient(slice_idx, lesion_bboxes, confidences, meta1)
-    assert_almost_equal(merged, np.array([63.98164368,  -21.35742188, -166.125, 16.13671875, 14.9765625, 15.0, 0.1883]))
+    patient_id = '778899'
+    lesion_on_slices = np.array([[33, 2, 326.1, 215.5, 347.5, 235.1, 0.1799],
+                                 [34, 2, 326.5, 215.4, 348.9, 235.8, 0.2455],
+                                 [35, 2, 326.4, 215.6, 349.2, 236.8, 0.2774],
+                                 [36, 2, 326.4, 215.4, 347.6, 235.4, 0.0504]])
+    merged = merge_slices_of_patient(lesion_on_slices, meta1)
+    assert_almost_equal(merged, np.array([2, 63.98164368,  -21.35742188, -166.125, 16.13671875, 14.9765625, 15.0, 0.1883]))
 
 
 def test_xmn_ymn_xmx_ymx_2_x_y_w_h():
